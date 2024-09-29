@@ -18,17 +18,32 @@ struct	Token{
 	TokenKind	kind;
 	Token		*next;
 	int			val;  // if (kind == num) value of number
-	char		*str; // token string
+	char		*str; // position of input string
 };
 
 // tokens of interest now
-Token *token;
+Token	*token;
+// user enterd programs
+char	*user_input;
 
 // for error reporting
 // same arguments as printf
+/*
 void	error(char *fmt, ...) {
 	va_list	ap;
 	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	fprintf(stderr, "\n");
+	exit(1);
+}
+*/
+void	error_at(char *loc, char *fmt, ...) {
+	va_list	ap;
+	va_start(ap, fmt);
+
+	int	pos = loc - user_input;
+	fprintf(stderr, "%s\n", user_input);
+	fprintf(stderr, "%*s^", pos, " ");
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit(1);
@@ -48,7 +63,7 @@ bool	consume(char op) {
 // else {error()}
 void	expect(char op) {
 	if (token->kind != TK_RESERVED || token->str[0] != op) {
-		error("'%c'ではありません", op);
+		error_at(token->str, "'%c'ではありません", op);
 	}
 	token = token->next;
 }
@@ -57,7 +72,7 @@ void	expect(char op) {
 // else {error()}
 int	expect_number() {
 	if(token->kind != TK_NUM) {
-		error("数ではありません");
+		error_at(token->str, "数ではありません");
 	}
 	int	val = token->val;
 	token = token->next;
@@ -97,7 +112,7 @@ Token	*tokenize(char *p) {
 			cur->val = strtol(p, &p, 10);
 			continue;
 		}
-		error("トークナイズできません");
+		error_at(p, "トークナイズできません");
 	}
 	new_token(TK_EOF, cur, p);
 	return (head.next);
@@ -109,6 +124,7 @@ int	main(int argc, char **argv) {
 		return 1;
 	}
 
+	user_input = argv[1];
 	token = tokenize(argv[1]);
 
 	// assembly template
