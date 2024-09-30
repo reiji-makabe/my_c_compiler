@@ -1,21 +1,38 @@
-CFLAGS :=-std=c11 -g -static
+NAME := 9cc
+RM := rm -rf
 
-all:9cc tags
+INCLUDE := include/
+SRC_DIR := src/
+OBJ_DIR := obj/
 
-9cc: 9cc.c
-	$(CC) $(CFLAGS) -o 9cc 9cc.c
+CFLAGS :=-std=c11 -g -static -I $(INCLUDE)
 
-test: 9cc
+SRC := $(wildcard $(SRC_DIR)*.c)
+OBJ := $(addprefix $(OBJ_DIR), $(notdir $(SRC:.c=.o)))
+
+#command
+all:$(NAME) tags
+
+$(NAME): $(OBJ)
+	$(CC) $(CFLAGS) -o $(NAME) $^
+
+$(OBJ_DIR)%.o:$(SRC_DIR)%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+test: $(NAME)
 	./test.sh
 
 tags:$(wildcard *.c *.h)
-	@if [ ! -f tags ] || [ "$(shell find . -name '*.c' -newer tags -o -name '*.h' -newer tags)" ]; then \
+	@if [ ! -f tags ] || [ "$?" ]; then \
 		echo "Updating ctags..."; \
 		ctags -R --exclude=Makefile; \
 	fi
 
 clean:
-	rm -f 9cc *.o *~ tmp* a.out
+	$(RM) $(OBJ) *~ tmp* a.out
+
+fclean:clean
+	$(RM) $(NAME)
 
 re:clean
 	make all
