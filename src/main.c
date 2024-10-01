@@ -11,25 +11,18 @@ int	main(int argc, char **argv) {
 
 	user_input = argv[1];
 	token = tokenize(argv[1]);
+	Node *node = expr();
 
 	// assembly template
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
 	printf("main:\n");
 
-	// The beginning of an expression must be a number
-	printf(" mov rax, %d\n", expect_number());
+	// code gen
+	gen(node);
 
-	// consume '+ <num>' or '- <num' token column
-	// and output assembly
-	while (!at_eof()) {
-		if (consume('+')) {
-			printf(" add rax, %d\n", expect_number());
-			continue;
-		}
-		expect('-');
-		printf(" sub rax, %d\n", expect_number());
-	}
-	printf(" ret\n");
+	// The end of culc result
+	printf("\tpop rax\n");
+	printf("\tret\n");
 	return 0;
 }
