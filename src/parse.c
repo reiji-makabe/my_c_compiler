@@ -12,7 +12,14 @@ void	error(char *fmt, ...) {
 }
 */
 
+/* expr    = mul ("+" mul | "-" mul)*
+ * mul     = unary ("*" unary | "/" unary)*
+ * unary   = ("+" | "-")? primary
+ * primary = num | "(" expr ")"
+ */
+
 static Node	*mul(void);
+static Node	*unary(void);
 static Node	*primary(void);
 
 void	error_at(char *loc, char *fmt, ...) {
@@ -27,14 +34,14 @@ void	error_at(char *loc, char *fmt, ...) {
 	exit(1);
 }
 
-// if (next == expected) {token = token->next, return (true)}
-// else {return (false) }
+// if (next == expected) {token = token->next, return true}
+// else {return false }
 bool	consume(char op) {
 	if (token->kind != TK_RESERVED || token->str[0] != op) {
-		return (false);
+		return false;
 	}
 	token = token->next;
-	return (true);
+	return true;
 }
 
 // if (next == expected) {token = token->next}
@@ -54,11 +61,11 @@ int	expect_number(void) {
 	}
 	int	val = token->val;
 	token = token->next;
-	return (val);
+	return val;
 }
 
 bool	at_eof(void) {
-	return (token->kind == TK_EOF);
+	return token->kind == TK_EOF;
 }
 
 // new token; cur->next = token;
@@ -67,7 +74,17 @@ Token	*new_token(TokenKind kind, Token *cur, char *str) {
 	tok->kind = kind;
 	tok->str = str;
 	cur->next = tok;
-	return (tok);
+	return tok;
+}
+
+int	is_token(char c) {
+	if (c == '+' || c == '-' || c == '*' || c == '/') {
+		return 1;
+	}
+	if (c == '(' || c == ')') {
+		return 1;
+	}
+	return 0;
 }
 
 // tokenize string p
@@ -81,7 +98,7 @@ Token	*tokenize(char *p) {
 			++p;
 			continue;
 		}
-		if (*p == '+' || *p == '-' || *p == '*' || *p == '/') {
+		if (is_token(*p)) {
 			cur = new_token(TK_RESERVED, cur, p++);
 			continue;
 		}
@@ -93,7 +110,7 @@ Token	*tokenize(char *p) {
 		error_at(p, "トークナイズできません");
 	}
 	new_token(TK_EOF, cur, p);
-	return (head.next);
+	return head.next;
 }
 
 Node	*new_node(NodeKind kind, Node *lhs, Node *rhs) {
@@ -101,7 +118,7 @@ Node	*new_node(NodeKind kind, Node *lhs, Node *rhs) {
 	node->kind = kind;
 	node->lhs = lhs;
 	node->rhs = rhs;
-	return (node);
+	return node;
 }
 
 // 実用的にはほぼ無いけどこれcalloc失敗したらどうなるんすかね
@@ -112,7 +129,7 @@ Node	*new_node_num(int val) {
 	Node	*node = (Node *)calloc(1, sizeof(Node));
 	node->kind = ND_NUM;
 	node->val = val;
-	return (node);
+	return node;
 }
 
 Node	*expr(void) {
@@ -124,30 +141,40 @@ Node	*expr(void) {
 		} else if (consume('-')) {
 			node = new_node(ND_SUB, node, mul());
 		} else {
-			return (node);
+			return node;
 		}
 	}
 }
 
 Node	*mul(void) {
-	Node	*node = primary();
+	Node	*node = unary();
 
 	while (1) {
 		if (consume('*')) {
-			node = new_node(ND_MUL, node, primary());
+			node = new_node(ND_MUL, node, unary());
 		} else if (consume('/')) {
-			node = new_node(ND_DIV, node, primary());
+			node = new_node(ND_DIV, node, unary());
 		} else {
-			return (node);
+			return node;
 		}
 	}
+}
+
+Node	*unary(void) {
+	if (consume('+')) {
+		return primary();
+	}
+	if (consume('-')) {
+		return new_node(ND_SUB, new_node_num(0), primary());
+	}
+	return primary();
 }
 
 Node	*primary(void) {
 	if (consume('(')) {
 		Node	*node = expr();
 		expect(')');
-		return (node);
+		return node;
 	}
-	return (new_node_num(expect_number()));
+	return new_node_num(expect_number());
 }
