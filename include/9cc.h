@@ -29,6 +29,7 @@ struct	Token{
 	Token		*next;
 	int			val;  // if (kind == num) value of number
 	char		*str; // position of input string
+	int			len; // length of token_string. if kind==num
 };
 
 typedef struct	Node Node;

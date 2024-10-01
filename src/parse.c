@@ -34,10 +34,22 @@ void	error_at(char *loc, char *fmt, ...) {
 	exit(1);
 }
 
+int	is_token(char c) {
+	if (c == '+' || c == '-' || c == '*' || c == '/') {
+		return 1;
+	}
+	if (c == '(' || c == ')') {
+		return 1;
+	}
+	return 0;
+}
+
 // if (next == expected) {token = token->next, return true}
 // else {return false }
-bool	consume(char op) {
-	if (token->kind != TK_RESERVED || token->str[0] != op) {
+bool	consume(char *op) {
+	if (token->kind != TK_RESERVED ||
+		strlen(op) != token->len ||
+		memcmp(token->str, op, token->len)) {
 		return false;
 	}
 	token = token->next;
@@ -46,8 +58,10 @@ bool	consume(char op) {
 
 // if (next == expected) {token = token->next}
 // else {error()}
-void	expect(char op) {
-	if (token->kind != TK_RESERVED || token->str[0] != op) {
+void	expect(char *op) {
+	if (token->kind != TK_RESERVED ||
+		strlen(op) != token->len ||
+		memcmp(token->str, op, token->len)) {
 		error_at(token->str, "'%c'ではありません", op);
 	}
 	token = token->next;
@@ -70,22 +84,20 @@ bool	at_eof(void) {
 
 // new token; cur->next = token;
 Token	*new_token(TokenKind kind, Token *cur, char *str) {
+	char	*tmp;
+
+	tmp = str;
+	while (!isspace(*str) && !isdigit(*str) && *str) {
+		++str;
+	}
 	Token	*tok = calloc(1, sizeof(Token));
 	tok->kind = kind;
-	tok->str = str;
 	cur->next = tok;
+	tok->str = tmp;
+	tok->len = str - tmp;
 	return tok;
 }
 
-int	is_token(char c) {
-	if (c == '+' || c == '-' || c == '*' || c == '/') {
-		return 1;
-	}
-	if (c == '(' || c == ')') {
-		return 1;
-	}
-	return 0;
-}
 
 // tokenize string p
 Token	*tokenize(char *p) {
@@ -99,12 +111,15 @@ Token	*tokenize(char *p) {
 			continue;
 		}
 		if (is_token(*p)) {
-			cur = new_token(TK_RESERVED, cur, p++);
+			cur = new_token(TK_RESERVED, cur, p);
+			p += cur->len;
 			continue;
 		}
 		if (isdigit(*p)) {
 			cur = new_token(TK_NUM, cur, p);
+			char *tmp = p;
 			cur->val = strtol(p, &p, 10);
+			cur->len = p - tmp;
 			continue;
 		}
 		error_at(p, "トークナイズできません");
@@ -136,9 +151,9 @@ Node	*expr(void) {
 	Node	*node = mul();
 
 	while (1) {
-		if (consume('+')) {
+		if (consume("+")) {
 			node = new_node(ND_ADD, node, mul());
-		} else if (consume('-')) {
+		} else if (consume("-")) {
 			node = new_node(ND_SUB, node, mul());
 		} else {
 			return node;
@@ -150,9 +165,9 @@ Node	*mul(void) {
 	Node	*node = unary();
 
 	while (1) {
-		if (consume('*')) {
+		if (consume("*")) {
 			node = new_node(ND_MUL, node, unary());
-		} else if (consume('/')) {
+		} else if (consume("/")) {
 			node = new_node(ND_DIV, node, unary());
 		} else {
 			return node;
@@ -161,19 +176,19 @@ Node	*mul(void) {
 }
 
 Node	*unary(void) {
-	if (consume('+')) {
+	if (consume("+")) {
 		return primary();
 	}
-	if (consume('-')) {
+	if (consume("-")) {
 		return new_node(ND_SUB, new_node_num(0), primary());
 	}
 	return primary();
 }
 
 Node	*primary(void) {
-	if (consume('(')) {
+	if (consume("(")) {
 		Node	*node = expr();
-		expect(')');
+		expect(")");
 		return node;
 	}
 	return new_node_num(expect_number());
