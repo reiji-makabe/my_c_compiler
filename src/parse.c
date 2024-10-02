@@ -12,12 +12,18 @@ void	error(char *fmt, ...) {
 }
 */
 
-/* expr    = mul ("+" mul | "-" mul)*
- * mul     = unary ("*" unary | "/" unary)*
- * unary   = ("+" | "-")? primary
- * primary = num | "(" expr ")"
+/* expr       = equality
+ * equality   = relational ("==" relational | "!=" relational)*
+ * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+ * add        = mul ("+" mul | "-" mul)*
+ * mul        = unary ("*" unary | "/" unary)*
+ * unary      = ("+" | "-")? primary
+ * primary    = num | "(" expr ")"
  */
 
+//static Node	*equality(void); expr = equality
+static Node	*relational(void);
+static Node	*add(void);
 static Node	*mul(void);
 static Node	*unary(void);
 static Node	*primary(void);
@@ -34,11 +40,14 @@ void	error_at(char *loc, char *fmt, ...) {
 	exit(1);
 }
 
-int	is_token(char c) {
-	if (c == '+' || c == '-' || c == '*' || c == '/') {
+int	is_token(char *c) {
+	if (!memcmp(c, "<=", 2) || !memcmp(c, ">=", 2) || !memcmp(c, "==", 2) || !memcmp(c, "!=", 2)){
+		return 2;
+	}
+	if (*c == '+' || *c == '-' || *c == '*' || *c == '/') {
 		return 1;
 	}
-	if (c == '(' || c == ')') {
+	if (*c == '(' || *c == ')' || *c == '<' || *c == '>') {
 		return 1;
 	}
 	return 0;
@@ -83,18 +92,12 @@ bool	at_eof(void) {
 }
 
 // new token; cur->next = token;
-Token	*new_token(TokenKind kind, Token *cur, char *str) {
-	char	*tmp;
-
-	tmp = str;
-	while (!isspace(*str) && !isdigit(*str) && *str) {
-		++str;
-	}
+Token	*new_token(TokenKind kind, Token *cur, char *start, char *end) {
 	Token	*tok = calloc(1, sizeof(Token));
 	tok->kind = kind;
 	cur->next = tok;
-	tok->str = tmp;
-	tok->len = str - tmp;
+	tok->str = start;
+	tok->len = end - start;
 	return tok;
 }
 
@@ -104,19 +107,22 @@ Token	*tokenize(char *p) {
 	Token	head;
 	head.next = NULL;
 	Token	*cur = &head;
+	int		len;
 
 	while (*p) {
 		if (isspace(*p)) {
 			++p;
 			continue;
 		}
-		if (is_token(*p)) {
-			cur = new_token(TK_RESERVED, cur, p);
-			p += cur->len;
+		len = 0;
+		len = is_token(p);
+		if (len) {
+			cur = new_token(TK_RESERVED, cur, p, p + len);
+			p += len;
 			continue;
 		}
 		if (isdigit(*p)) {
-			cur = new_token(TK_NUM, cur, p);
+			cur = new_token(TK_NUM, cur, p, p);
 			char *tmp = p;
 			cur->val = strtol(p, &p, 10);
 			cur->len = p - tmp;
@@ -124,7 +130,7 @@ Token	*tokenize(char *p) {
 		}
 		error_at(p, "トークナイズできません");
 	}
-	new_token(TK_EOF, cur, p);
+	new_token(TK_EOF, cur, p, p);
 	return head.next;
 }
 
@@ -136,10 +142,6 @@ Node	*new_node(NodeKind kind, Node *lhs, Node *rhs) {
 	return node;
 }
 
-// 実用的にはほぼ無いけどこれcalloc失敗したらどうなるんすかね
-// まあNULL返るだけか
-// でもexprでnode = new_node(?, node, ?);ってやってるの元のノードの位置喪失しない?
-// まあこのプログラムの作成方針はメモリ管理を行わない(終了時に全部freeされるし)らしいですが…
 Node	*new_node_num(int val) {
 	Node	*node = (Node *)calloc(1, sizeof(Node));
 	node->kind = ND_NUM;
@@ -148,6 +150,38 @@ Node	*new_node_num(int val) {
 }
 
 Node	*expr(void) {
+	Node	*node = relational();
+
+	while (1) {
+		if (consume("==")) {
+			node = new_node(ND_EQ, node, add());
+		} else if (consume("!=")) {
+			node = new_node(ND_NEQ, node, add());
+		} else {
+			return node;
+		}
+	}
+}
+
+Node	*relational(void) {
+	Node	*node = add();
+
+	while (1) {
+		if (consume("<")) {
+			node = new_node(ND_LT, node, add());
+		} else if (consume("<=")) {
+			node = new_node(ND_LTE, node, add());
+		} else if (consume(">")) {
+			node = new_node(ND_GT, node, add());
+		} else if (consume(">=")) {
+			node = new_node(ND_GTE, node, add());
+		} else {
+			return node;
+		}
+	}
+}
+
+Node	*add(void) {
 	Node	*node = mul();
 
 	while (1) {

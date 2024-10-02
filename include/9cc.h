@@ -20,6 +20,12 @@ typedef enum {
 	ND_SUB, // -
 	ND_MUL, // *
 	ND_DIV, // /
+	ND_EQ,  // ==  equal
+	ND_NEQ, // !=  not equal
+	ND_LT,  // <   less than
+	ND_LTE, // <=  less than equal
+	ND_GT,  // >   greater than
+	ND_GTE, // >=  greater than equal
 	ND_NUM, // number
 } NodeKind;
 
