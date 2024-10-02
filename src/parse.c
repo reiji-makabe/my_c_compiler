@@ -107,14 +107,13 @@ Token	*tokenize(char *p) {
 	Token	head;
 	head.next = NULL;
 	Token	*cur = &head;
-	int		len;
 
 	while (*p) {
 		if (isspace(*p)) {
 			++p;
 			continue;
 		}
-		len = 0;
+		int	len;
 		len = is_token(p);
 		if (len) {
 			cur = new_token(TK_RESERVED, cur, p, p + len);
@@ -172,9 +171,9 @@ Node	*relational(void) {
 		} else if (consume("<=")) {
 			node = new_node(ND_LTE, node, add());
 		} else if (consume(">")) {
-			node = new_node(ND_GT, node, add());
+			node = new_node(ND_GT, add(), node);
 		} else if (consume(">=")) {
-			node = new_node(ND_GTE, node, add());
+			node = new_node(ND_GTE, add(), node);
 		} else {
 			return node;
 		}

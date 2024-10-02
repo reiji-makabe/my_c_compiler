@@ -25,5 +25,15 @@ assert 20 "-10+30"
 assert 20 "10 + (2 * 5)"
 assert 42 "48 + 2 * -3"
 assert 4 "7 + (-3)"
+assert 1 "42 == 42"
+assert 1 "42 != 0"
+assert 1 "0 < 42"
+assert 1 "0 <= 42"
+assert 1 "42 <= 42"
+assert 1 "42 > 0"
+assert 1 "42 >= 0"
+assert 1 "42 >= 42"
+
+# 42 > 0 で止まってるよん
 
 echo ok
