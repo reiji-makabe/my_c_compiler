@@ -78,7 +78,7 @@ void	expect(char *op) {
 	if (token->kind != TK_RESERVED ||
 		strlen(op) != token->len ||
 		memcmp(token->str, op, token->len)) {
-		error_at(token->str, "'%c'ではありません", op);
+		error_at(token->str, "'%s'ではありません", op);
 	}
 	token = token->next;
 }
@@ -128,7 +128,8 @@ Token	*tokenize(char *p) {
 			continue;
 		}
 		if ('a' <= *p && *p <= 'z') {
-			cur = new_token(TK_IDENT, cur, p, p++);
+			cur = new_token(TK_IDENT, cur, p, p + 1);
+			p += 1;
 			continue;
 		}
 		if (isdigit(*p)) {

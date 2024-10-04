@@ -9,10 +9,22 @@ assert() {
 	actual="$?"
 
 	if [ "$actual" = "$expected" ]; then
-		echo "$input => $actual"
+		echo "$input -> $actual"
 	else
-		echo "$input => $expected expected, but got $actual"
+		echo "$input -> $expected expected, but got $actual"
 		exit 1
+	fi
+}
+
+error() {
+	expected="$1"
+	input="$2"
+
+	error=$(./9cc "$input" 2>&1 > tmp.s)
+	if [ "$error" = "$expected" ]; then
+		echo "$expected:$input"
+	else
+		echo "error message $expected is expected, but got $error"
 	fi
 }
 
@@ -34,7 +46,6 @@ assert 1 "42 > 0;"
 assert 1 "42 >= 0;"
 assert 1 "42 >= 42;"
 assert 1 "a=0; b=1; a+b;"
-
-# 42 > 0 で止まってるよん
+error "代入の左辺値が変数ではありません" "a + b = 3;"
 
 echo ok
