@@ -11,6 +11,7 @@
 // token type
 typedef enum {
 	TK_RESERVED,  // symbol
+	TK_IDENT, // identifier
 	TK_NUM,  // number
 	TK_EOF,  // EOF
 } TokenKind;
@@ -27,6 +28,8 @@ typedef enum {
 	ND_GT,  // >   greater than
 	ND_GTE, // >=  greater than equal
 	ND_NUM, // number
+	ND_ASSIGN, // = assign value to variable
+	ND_LVAR // local variable
 } NodeKind;
 
 typedef struct	Token Token;
@@ -44,20 +47,18 @@ struct Node {
 	Node		*lhs; // left side
 	Node		*rhs; // right side
 	int			val; //if(kind==num) val=num
+	int			offset; // if (kind==lvar) offset=stack address(RBP - offset = lvar)
 };
 
 // tokens of interest now
 extern Token	*token;
 // user enterd programs
 extern char		*user_input;
+extern Node		*code[100];
 
 Token	*tokenize(char *p);
-//bool	at_eof(void);
-//int		expect_number(void);
-//bool	consume(char op);
-//void	expect(char op);
-//void	error_at(char *loc, char *fmt, ...);
-Node	*expr(void);
+Node	*program(void);
 void	gen(Node *node);
+void	error(char *fmt, ...);
 
 #endif

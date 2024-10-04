@@ -11,18 +11,31 @@ int	main(int argc, char **argv) {
 
 	user_input = argv[1];
 	token = tokenize(user_input);
-	Node *node = expr();
+	program();
 
 	// assembly template
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
 	printf("main:\n");
 
-	// code gen
-	gen(node);
+	// prologue
+	printf("\tpush rbp\n");
+	printf("\tmov rbp, rsp\n");
+	printf("\tsub rsp, 208\n");
 
+	// code gen
+	for (int i=0; code[i]; ++i) {
+		gen(code[i]);
+
+		// 式の評価結果としてスタックに1つ値が残っているらしい
+		// 正直よくわかっていない
+		printf("\tpop rax\n");
+	}
+
+	// epilogue
 	// The end of culc result
-	printf("\tpop rax\n");
+	printf("\tmov rsp, rbp\n");
+	printf("\tpop rbp\n");
 	printf("\tret\n");
 	return 0;
 }

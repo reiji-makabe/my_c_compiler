@@ -16,23 +16,24 @@ assert() {
 	fi
 }
 
-assert 0 0
-assert 42 42
-assert 21 "5+20-4"
-assert 41 " 12 + 34 - 5 "
-assert 42 "20*2 + 4 / 2"
-assert 20 "-10+30"
-assert 20 "10 + (2 * 5)"
-assert 42 "48 + 2 * -3"
-assert 4 "7 + (-3)"
-assert 1 "42 == 42"
-assert 1 "42 != 0"
-assert 1 "0 < 42"
-assert 1 "0 <= 42"
-assert 1 "42 <= 42"
-assert 1 "42 > 0"
-assert 1 "42 >= 0"
-assert 1 "42 >= 42"
+assert 0 "0;"
+assert 42 "42;"
+assert 21 "5+20-4;"
+assert 41 " 12 + 34 - 5 ;"
+assert 42 "20*2 + 4 / 2;"
+assert 20 "-10+30;"
+assert 20 "10 + (2 * 5);"
+assert 42 "48 + 2 * -3;"
+assert 4 "7 + (-3);"
+assert 1 "42 == 42;"
+assert 1 "42 != 0;"
+assert 1 "0 < 42;"
+assert 1 "0 <= 42;"
+assert 1 "42 <= 42;"
+assert 1 "42 > 0;"
+assert 1 "42 >= 0;"
+assert 1 "42 >= 42;"
+assert 1 "a=0; b=1; a+b;"
 
 # 42 > 0 で止まってるよん
 

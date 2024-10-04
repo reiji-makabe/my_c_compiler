@@ -1,8 +1,20 @@
 #include "9cc.h"
 
+/* program    = stmt*
+ * stmt       = expr ";"
+ * expr       = assign
+ * assign     = equality ("=" assign)?
+ * equality   = relational ("==" relational | "!=" relational)*
+ * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+ * add        = mul ("+" mul | "-" mul)*
+ * mul        = unary ("*" unary | "/" unary)*
+ * unary      = ("+" | "-")? primary
+ * primary    = num | ident | "(" expr ")"
+ */
+
 // for error reporting
 // same arguments as printf
-/*
+
 void	error(char *fmt, ...) {
 	va_list	ap;
 	va_start(ap, fmt);
@@ -10,23 +22,7 @@ void	error(char *fmt, ...) {
 	fprintf(stderr, "\n");
 	exit(1);
 }
-*/
 
-/* expr       = equality
- * equality   = relational ("==" relational | "!=" relational)*
- * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
- * add        = mul ("+" mul | "-" mul)*
- * mul        = unary ("*" unary | "/" unary)*
- * unary      = ("+" | "-")? primary
- * primary    = num | "(" expr ")"
- */
-
-//static Node	*equality(void); expr = equality
-static Node	*relational(void);
-static Node	*add(void);
-static Node	*mul(void);
-static Node	*unary(void);
-static Node	*primary(void);
 
 void	error_at(char *loc, char *fmt, ...) {
 	va_list	ap;
@@ -47,7 +43,7 @@ int	is_token(char *c) {
 	if (*c == '+' || *c == '-' || *c == '*' || *c == '/') {
 		return 1;
 	}
-	if (*c == '(' || *c == ')' || *c == '<' || *c == '>') {
+	if (*c == '(' || *c == ')' || *c == '<' || *c == '>' || *c == ';' || *c == '=') {
 		return 1;
 	}
 	return 0;
@@ -63,6 +59,17 @@ bool	consume(char *op) {
 	}
 	token = token->next;
 	return true;
+}
+
+// if (now == identifier) {token = token->next, return Token(token->previous)}
+Token	*consume_ident(void) {
+	Token	*tok = NULL;
+
+	if (token->kind == TK_IDENT) {
+		tok = token;
+		token = token->next;
+	}
+	return tok;
 }
 
 // if (next == expected) {token = token->next}
@@ -120,6 +127,10 @@ Token	*tokenize(char *p) {
 			p += len;
 			continue;
 		}
+		if ('a' <= *p && *p <= 'z') {
+			cur = new_token(TK_IDENT, cur, p, p++);
+			continue;
+		}
 		if (isdigit(*p)) {
 			cur = new_token(TK_NUM, cur, p, p);
 			char *tmp = p;
@@ -148,14 +159,58 @@ Node	*new_node_num(int val) {
 	return node;
 }
 
-Node	*expr(void) {
-	Node	*node = relational();
+Node	*code[100];
+
+Node	*expr(void);
+
+Node	*primary(void) {
+	if (consume("(")) {
+		Node	*node = expr();
+		expect(")");
+		return node;
+	}
+	Token	*tok = consume_ident();
+	if (tok) {
+		Node	*node = calloc(1, sizeof(Node));
+		node->kind = ND_LVAR;
+		node->offset = (tok->str[0] - 'a' + 1) * 8;
+		return node;
+	}
+	return new_node_num(expect_number());
+}
+
+Node	*unary(void) {
+	if (consume("+")) {
+		return primary();
+	}
+	if (consume("-")) {
+		return new_node(ND_SUB, new_node_num(0), primary());
+	}
+	return primary();
+}
+
+Node	*mul(void) {
+	Node	*node = unary();
 
 	while (1) {
-		if (consume("==")) {
-			node = new_node(ND_EQ, node, add());
-		} else if (consume("!=")) {
-			node = new_node(ND_NEQ, node, add());
+		if (consume("*")) {
+			node = new_node(ND_MUL, node, unary());
+		} else if (consume("/")) {
+			node = new_node(ND_DIV, node, unary());
+		} else {
+			return node;
+		}
+	}
+}
+
+Node	*add(void) {
+	Node	*node = mul();
+
+	while (1) {
+		if (consume("+")) {
+			node = new_node(ND_ADD, node, mul());
+		} else if (consume("-")) {
+			node = new_node(ND_SUB, node, mul());
 		} else {
 			return node;
 		}
@@ -180,49 +235,48 @@ Node	*relational(void) {
 	}
 }
 
-Node	*add(void) {
-	Node	*node = mul();
+Node	*equality(void) {
+	Node	*node = relational();
 
 	while (1) {
-		if (consume("+")) {
-			node = new_node(ND_ADD, node, mul());
-		} else if (consume("-")) {
-			node = new_node(ND_SUB, node, mul());
+		if (consume("==")) {
+			node = new_node(ND_EQ, node, add());
+		} else if (consume("!=")) {
+			node = new_node(ND_NEQ, node, add());
 		} else {
 			return node;
 		}
 	}
 }
 
-Node	*mul(void) {
-	Node	*node = unary();
+Node	*assign(void) {
+	Node	*node = equality();
 
 	while (1) {
-		if (consume("*")) {
-			node = new_node(ND_MUL, node, unary());
-		} else if (consume("/")) {
-			node = new_node(ND_DIV, node, unary());
-		} else {
-			return node;
+		if (consume("=")) {
+			node = new_node(ND_ASSIGN, node, assign());
 		}
-	}
-}
-
-Node	*unary(void) {
-	if (consume("+")) {
-		return primary();
-	}
-	if (consume("-")) {
-		return new_node(ND_SUB, new_node_num(0), primary());
-	}
-	return primary();
-}
-
-Node	*primary(void) {
-	if (consume("(")) {
-		Node	*node = expr();
-		expect(")");
 		return node;
 	}
-	return new_node_num(expect_number());
+}
+
+Node	*expr(void) {
+	Node	*node = assign();
+// I don't need this function, but I'm including it for visibility and clarity
+// Don't worry, it will probably disappear after optimization
+}
+
+Node	*stmt(void) {
+	Node	*node = expr();
+	expect(";");
+	return node;
+}
+
+Node	*program(void) {
+	int	i = 0;
+
+	while (!at_eof()) {
+		code[i++] = stmt();
+	}
+	code[i] = NULL;
 }

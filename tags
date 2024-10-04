@@ -38,9 +38,6 @@
 !_TAG_KIND_DESCRIPTION!C++	t,typedef	/typedefs/
 !_TAG_KIND_DESCRIPTION!C++	u,union	/union names/
 !_TAG_KIND_DESCRIPTION!C++	v,variable	/variable definitions/
-!_TAG_KIND_DESCRIPTION!Make	I,makefile	/makefiles/
-!_TAG_KIND_DESCRIPTION!Make	m,macro	/macros/
-!_TAG_KIND_DESCRIPTION!Make	t,target	/targets/
 !_TAG_KIND_DESCRIPTION!Sh	a,alias	/aliases/
 !_TAG_KIND_DESCRIPTION!Sh	f,function	/functions/
 !_TAG_KIND_DESCRIPTION!Sh	h,heredoc	/label for here document/
@@ -52,7 +49,6 @@
 !_TAG_PARSER_VERSION!Asm	1.0	/current.age/
 !_TAG_PARSER_VERSION!C	1.1	/current.age/
 !_TAG_PARSER_VERSION!C++	1.1	/current.age/
-!_TAG_PARSER_VERSION!Make	0.0	/current.age/
 !_TAG_PARSER_VERSION!Sh	0.0	/current.age/
 !_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
 !_TAG_PROC_CWD	/home/cat/learn/compiler/9cc/	//
@@ -68,30 +64,27 @@
 !_TAG_ROLE_DESCRIPTION!C++!header	local	/local header/
 !_TAG_ROLE_DESCRIPTION!C++!header	system	/system header/
 !_TAG_ROLE_DESCRIPTION!C++!macro	undef	/undefined/
-!_TAG_ROLE_DESCRIPTION!Make!makefile	included	/included/
-!_TAG_ROLE_DESCRIPTION!Make!makefile	optional	/optionally included/
 !_TAG_ROLE_DESCRIPTION!Sh!heredoc	endmarker	/end marker/
 !_TAG_ROLE_DESCRIPTION!Sh!script	loaded	/loaded/
-$(NAME)	Makefile	/^$(NAME): $(OBJ)$/;"	t
-$(OBJ_DIR)%.o	Makefile	/^$(OBJ_DIR)%.o:$(SRC_DIR)%.c$/;"	t
-CFLAGS	Makefile	/^CFLAGS :=-std=c11 -g -static -I $(INCLUDE)$/;"	m
-INCLUDE	Makefile	/^INCLUDE := include\/$/;"	m
-NAME	Makefile	/^NAME := 9cc$/;"	m
 ND_ADD	include/9cc.h	/^	ND_ADD, \/\/ +$/;"	e	enum:__anona20a518d0203
+ND_ASSIGN	include/9cc.h	/^	ND_ASSIGN, \/\/ = assign value to variable$/;"	e	enum:__anona20a518d0203
 ND_DIV	include/9cc.h	/^	ND_DIV, \/\/ \/$/;"	e	enum:__anona20a518d0203
+ND_EQ	include/9cc.h	/^	ND_EQ,  \/\/ ==  equal$/;"	e	enum:__anona20a518d0203
+ND_GT	include/9cc.h	/^	ND_GT,  \/\/ >   greater than$/;"	e	enum:__anona20a518d0203
+ND_GTE	include/9cc.h	/^	ND_GTE, \/\/ >=  greater than equal$/;"	e	enum:__anona20a518d0203
+ND_LT	include/9cc.h	/^	ND_LT,  \/\/ <   less than$/;"	e	enum:__anona20a518d0203
+ND_LTE	include/9cc.h	/^	ND_LTE, \/\/ <=  less than equal$/;"	e	enum:__anona20a518d0203
+ND_LVAR	include/9cc.h	/^	ND_LVAR \/\/ local variable$/;"	e	enum:__anona20a518d0203
 ND_MUL	include/9cc.h	/^	ND_MUL, \/\/ *$/;"	e	enum:__anona20a518d0203
+ND_NEQ	include/9cc.h	/^	ND_NEQ, \/\/ !=  not equal$/;"	e	enum:__anona20a518d0203
 ND_NUM	include/9cc.h	/^	ND_NUM, \/\/ number$/;"	e	enum:__anona20a518d0203
 ND_SUB	include/9cc.h	/^	ND_SUB, \/\/ -$/;"	e	enum:__anona20a518d0203
 NINE_CC_H	include/9cc.h	/^#define NINE_CC_H$/;"	d
 Node	include/9cc.h	/^struct Node {$/;"	s
 Node	include/9cc.h	/^typedef struct	Node Node;$/;"	t	typeref:struct:Node
 NodeKind	include/9cc.h	/^} NodeKind;$/;"	t	typeref:enum:__anona20a518d0203
-OBJ	Makefile	/^OBJ := $(addprefix $(OBJ_DIR), $(notdir $(SRC:.c=.o)))$/;"	m
-OBJ_DIR	Makefile	/^OBJ_DIR := obj\/$/;"	m
-RM	Makefile	/^RM := rm -rf$/;"	m
-SRC	Makefile	/^SRC := $(wildcard $(SRC_DIR)*.c)$/;"	m
-SRC_DIR	Makefile	/^SRC_DIR := src\/$/;"	m
 TK_EOF	include/9cc.h	/^	TK_EOF,  \/\/ EOF$/;"	e	enum:__anona20a518d0103
+TK_IDENT	include/9cc.h	/^	TK_IDENT, \/\/ identifier$/;"	e	enum:__anona20a518d0103
 TK_NUM	include/9cc.h	/^	TK_NUM,  \/\/ number$/;"	e	enum:__anona20a518d0103
 TK_RESERVED	include/9cc.h	/^	TK_RESERVED,  \/\/ symbol$/;"	e	enum:__anona20a518d0103
 Token	include/9cc.h	/^struct	Token{$/;"	s
@@ -99,20 +92,22 @@ Token	include/9cc.h	/^typedef struct	Token Token;$/;"	t	typeref:struct:Token
 TokenKind	include/9cc.h	/^} TokenKind;$/;"	t	typeref:enum:__anona20a518d0103
 __anona20a518d0103	include/9cc.h	/^typedef enum {$/;"	g
 __anona20a518d0203	include/9cc.h	/^typedef enum {$/;"	g
-all	Makefile	/^all:$(NAME) tags$/;"	t
+add	src/parse.c	/^Node	*add(void) {$/;"	f	typeref:typename:Node *
 assert	test.sh	/^assert() {$/;"	f
+assign	src/parse.c	/^Node	*assign(void) {$/;"	f	typeref:typename:Node *
 at_eof	src/parse.c	/^bool	at_eof(void) {$/;"	f	typeref:typename:bool
-clean	Makefile	/^clean:$/;"	t
+code	src/parse.c	/^Node	*code[100];$/;"	v	typeref:typename:Node * [100]
 consume	src/parse.c	/^bool	consume(char *op) {$/;"	f	typeref:typename:bool
-debug	Makefile	/^debug:CFLAGS += -g3 -O0$/;"	t
-debug	Makefile	/^debug:clean 9cc$/;"	t
+consume_ident	src/parse.c	/^Token	*consume_ident(void) {$/;"	f	typeref:typename:Token *
+equality	src/parse.c	/^Node	*equality(void) {$/;"	f	typeref:typename:Node *
+error	src/parse.c	/^void	error(char *fmt, ...) {$/;"	f	typeref:typename:void
 error_at	src/parse.c	/^void	error_at(char *loc, char *fmt, ...) {$/;"	f	typeref:typename:void
 expect	src/parse.c	/^void	expect(char *op) {$/;"	f	typeref:typename:void
 expect_number	src/parse.c	/^int	expect_number(void) {$/;"	f	typeref:typename:int
 expr	src/parse.c	/^Node	*expr(void) {$/;"	f	typeref:typename:Node *
-fclean	Makefile	/^fclean:clean$/;"	t
 gen	src/codegen.c	/^void	gen(Node *node) {$/;"	f	typeref:typename:void
-is_token	src/parse.c	/^int	is_token(char c) {$/;"	f	typeref:typename:int
+gen_lval	src/codegen.c	/^void	gen_lval(Node *node) {$/;"	f	typeref:typename:void
+is_token	src/parse.c	/^int	is_token(char *c) {$/;"	f	typeref:typename:int
 kind	include/9cc.h	/^	NodeKind	kind; \/\/ node type$/;"	m	struct:Node	typeref:typename:NodeKind
 kind	include/9cc.h	/^	TokenKind	kind;$/;"	m	struct:Token	typeref:typename:TokenKind
 len	include/9cc.h	/^	int			len; \/\/ length of token_string. if kind==num$/;"	m	struct:Token	typeref:typename:int
@@ -123,12 +118,13 @@ new_node	src/parse.c	/^Node	*new_node(NodeKind kind, Node *lhs, Node *rhs) {$/;"
 new_node_num	src/parse.c	/^Node	*new_node_num(int val) {$/;"	f	typeref:typename:Node *
 new_token	src/parse.c	/^Token	*new_token(TokenKind kind, Token *cur, char *start, char *end) {$/;"	f	typeref:typename:Token *
 next	include/9cc.h	/^	Token		*next;$/;"	m	struct:Token	typeref:typename:Token *
+offset	include/9cc.h	/^	int			offset; \/\/ if (kind==lvar) offset=stack address(RBP - offset = lvar)$/;"	m	struct:Node	typeref:typename:int
 primary	src/parse.c	/^Node	*primary(void) {$/;"	f	typeref:typename:Node *
-re	Makefile	/^re:clean$/;"	t
+program	src/parse.c	/^Node	*program(void) {$/;"	f	typeref:typename:Node *
+relational	src/parse.c	/^Node	*relational(void) {$/;"	f	typeref:typename:Node *
 rhs	include/9cc.h	/^	Node		*rhs; \/\/ right side$/;"	m	struct:Node	typeref:typename:Node *
+stmt	src/parse.c	/^Node	*stmt(void) {$/;"	f	typeref:typename:Node *
 str	include/9cc.h	/^	char		*str; \/\/ position of input string$/;"	m	struct:Token	typeref:typename:char *
-tags	Makefile	/^tags:$(wildcard *.c *.h)$/;"	t
-test	Makefile	/^test: $(NAME)$/;"	t
 token	src/main.c	/^Token	*token;$/;"	v	typeref:typename:Token *
 tokenize	src/parse.c	/^Token	*tokenize(char *p) {$/;"	f	typeref:typename:Token *
 unary	src/parse.c	/^Node	*unary(void) {$/;"	f	typeref:typename:Node *

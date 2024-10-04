@@ -5,7 +5,7 @@ INCLUDE := include/
 SRC_DIR := src/
 OBJ_DIR := obj/
 
-CFLAGS :=-std=c11 -g -static -I $(INCLUDE)
+CFLAGS :=-std=c17 -g -static -I $(INCLUDE)
 
 SRC := $(wildcard $(SRC_DIR)*.c)
 OBJ := $(addprefix $(OBJ_DIR), $(notdir $(SRC:.c=.o)))
@@ -38,6 +38,6 @@ re:clean
 	make all
 
 debug:CFLAGS += -g3 -O0
-debug:clean 9cc
+debug:$(NAME)
 
 .PHONY: all test clean re debug tags
