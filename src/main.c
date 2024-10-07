@@ -30,6 +30,8 @@ int	main(int argc, char **argv) {
 
 		// 式の評価結果としてスタックに1つ値が残っているらしい
 		// 正直よくわかっていない
+		// あー なんとなく分かってきたかもしれない
+		// 多分、普通にpushしたままっていうだけ(programはstmtでstmtはexprの塊でexprは最終的に数値をpushしてるじゃん、みたいな...
 		printf("\tpop rax\n");
 	}
 
