@@ -1,7 +1,8 @@
 #include "9cc.h"
+#include "my_conv.h"
 
 /* program    = stmt*
- * stmt       = expr ";"
+ * stmt       = expr ";" | "return" expr ";"
  * expr       = assign
  * assign     = equality ("=" assign)?
  * equality   = relational ("==" relational | "!=" relational)*
@@ -52,8 +53,8 @@ int	is_token(char *c) {
 // if (next == expected) {token = token->next, return true}
 // else {return false }
 bool	consume(char *op) {
-	if (token->kind != TK_RESERVED ||
-		strlen(op) != token->len ||
+	// token->kind != TK_RESERVED ||
+	if (strlen(op) != token->len ||
 		memcmp(token->str, op, token->len)) {
 		return false;
 	}
@@ -139,7 +140,12 @@ Token	*tokenize(char *p) {
 			p += len;
 			continue;
 		}
-		if (isalpha(*p) || *p == '_') {
+		if ('a' <= *p && *p <= 'z') {
+			if (!memcmp(p, "return", 6) && !is_lval_char(p[6])) {
+				cur = new_token(TK_RETURN, cur, p, p + 6);
+				p += 6;
+				continue;
+			}
 			char	*tmp_p;
 			tmp_p = p;
 			while (isalpha(*tmp_p) || *tmp_p == '_') {
@@ -301,8 +307,18 @@ Node	*expr(void) {
 }
 
 Node	*stmt(void) {
-	Node	*node = expr();
-	expect(";");
+	Node	*node;
+
+	if (consume("return")) {
+		node = calloc(1, sizeof(Node));
+		node->kind = ND_RETURN;
+		node->lhs = expr();
+	} else {
+		node = expr();
+	}
+	if (!consume(";")) {
+		error_at(token->str, "';'ではないトークンです");
+	}
 	return node;
 }
 

@@ -47,6 +47,8 @@ assert 1 "42 >= 0;"
 assert 1 "42 >= 42;"
 assert 1 "a=0; b=1; a+b;"
 assert 10 "foo = 5; bar = 2; foo * bar;"
+assert 10 "foo = 5; bar = 2; return foo * bar;"
 error "代入の左辺値が変数ではありません" "a + b = 3;"
+assert 2 "return 2;"
 
 echo ok

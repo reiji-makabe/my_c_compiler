@@ -11,6 +11,7 @@
 // token type
 typedef enum {
 	TK_RESERVED,  // symbol
+	TK_RETURN, // return statement
 	TK_IDENT, // identifier
 	TK_NUM,  // number
 	TK_EOF,  // EOF
@@ -29,7 +30,8 @@ typedef enum {
 	ND_GTE, // >=  greater than equal
 	ND_NUM, // number
 	ND_ASSIGN, // = assign value to variable
-	ND_LVAR // local variable
+	ND_LVAR,   // local variable
+	ND_RETURN  // return statement
 } NodeKind;
 
 typedef struct	Token Token;
