@@ -50,11 +50,22 @@ struct Node {
 	int			offset; // if (kind==lvar) offset=stack address(RBP - offset = lvar)
 };
 
+typedef struct	LVar LVar;
+
+// local variable type
+struct	LVar {
+	LVar	*next;
+	char	*name;
+	int		len;
+	int		offset;
+};
+
 // tokens of interest now
 extern Token	*token;
 // user enterd programs
 extern char		*user_input;
 extern Node		*code[100];
+extern LVar		*locals;
 
 Token	*tokenize(char *p);
 Node	*program(void);

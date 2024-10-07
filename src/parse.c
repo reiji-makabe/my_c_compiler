@@ -94,6 +94,18 @@ int	expect_number(void) {
 	return val;
 }
 
+// searches for lvar array by name
+// if not found, return NULL
+LVar	*find_lvar(Token *tok) {
+	for (LVar *var = locals; var; var = var->next) {
+		if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) {
+			return var;
+		}
+	}
+	return NULL;
+}
+
+// return whether the end of token
 bool	at_eof(void) {
 	return token->kind == TK_EOF;
 }
@@ -127,9 +139,14 @@ Token	*tokenize(char *p) {
 			p += len;
 			continue;
 		}
-		if ('a' <= *p && *p <= 'z') {
-			cur = new_token(TK_IDENT, cur, p, p + 1);
-			p += 1;
+		if (isalpha(*p) || *p == '_') {
+			char	*tmp_p;
+			tmp_p = p;
+			while (isalpha(*tmp_p) || *tmp_p == '_') {
+				++tmp_p;
+				}
+			cur = new_token(TK_IDENT, cur, p, tmp_p);
+			p += cur->len;
 			continue;
 		}
 		if (isdigit(*p)) {
@@ -174,7 +191,23 @@ Node	*primary(void) {
 	if (tok) {
 		Node	*node = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
-		node->offset = (tok->str[0] - 'a' + 1) * 8;
+
+		LVar *lvar = find_lvar(tok);
+		if (lvar) {
+			node->offset = lvar->offset;
+		} else {
+			lvar = (LVar *)calloc(1, sizeof(LVar));
+			lvar->next = locals;
+			lvar->name = tok->str;
+			lvar->len = tok->len;
+			if (locals == NULL) {
+				lvar->offset = 8;
+			} else {
+				lvar->offset = locals->offset + 8;
+			}
+			node->offset = lvar->offset;
+			locals = lvar;
+		}
 		return node;
 	}
 	return new_node_num(expect_number());

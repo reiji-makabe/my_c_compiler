@@ -2,6 +2,7 @@
 
 Token	*token;
 char	*user_input;
+LVar	*locals;
 
 int	main(int argc, char **argv) {
 	if (argc != 2) {
